@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Secret Preview</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Перегляд секретних даних</h1>
+            <p class="subtitle">Демонстрація маскування секретів</p>
+        </header>
+
+        <main>
+            <button id="fetchBtn" class="fetch-button">Отримати інформацію</button>
+            
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Завантаження...</p>
+            </div>
+
+            <div id="result" class="result hidden">
+                <h2>Результат:</h2>
+                <div class="info-card">
+                    <div class="info-item">
+                        <span class="label">Статус:</span>
+                        <span id="status" class="value"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Повідомлення:</span>
+                        <span id="message" class="value"></span>
+                    </div>
+                    <div class="info-item highlight">
+                        <span class="label">Маскований секрет:</span>
+                        <span id="secretPreview" class="value secret-value"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error" class="error hidden">
+                <h3>❌ Помилка</h3>
+                <p id="errorMessage"></p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Переконайтеся, що бекенд сервер запущено на порту 8000</p>
+        </footer>
+    </div>
+
+    <script>
+        const fetchBtn = document.getElementById('fetchBtn');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const error = document.getElementById('error');
+        const statusEl = document.getElementById('status');
+        const messageEl = document.getElementById('message');
+        const secretPreviewEl = document.getElementById('secretPreview');
+        const errorMessageEl = document.getElementById('errorMessage');
+
+        fetchBtn.addEventListener('click', async () => {
+            // Приховуємо попередні результати
+            result.classList.add('hidden');
+            error.classList.add('hidden');
+            loading.classList.remove('hidden');
+            fetchBtn.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:8000/api/info');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP помилка! статус: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Відображаємо дані
+                statusEl.textContent = data.status || 'N/A';
+                messageEl.textContent = data.message || 'N/A';
+                secretPreviewEl.textContent = data.secret_preview || 'N/A';
+                
+                loading.classList.add('hidden');
+                result.classList.remove('hidden');
+            } catch (err) {
+                loading.classList.add('hidden');
+                errorMessageEl.textContent = err.message;
+                error.classList.remove('hidden');
+            } finally {
+                fetchBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
+
